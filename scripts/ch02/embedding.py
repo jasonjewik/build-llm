@@ -11,7 +11,7 @@ def main():
         batch_size=8,
         max_length=max_length,
         stride=max_length,  # stride = max_length means no overlapping windows
-        shuffle=False, 
+        shuffle=False,
     )
     data_iter = iter(dataloader)
     inputs, _ = next(data_iter)

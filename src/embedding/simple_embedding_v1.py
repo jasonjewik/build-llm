@@ -4,8 +4,8 @@ import torch
 
 
 class SimpleEmbeddingV1(torch.nn.Module):
-    """A simple, non-trainable embedding model to show the fundamental idea."""
-    
+    """A simple embedding model with absolute positional embeddings."""
+
     def __init__(
         self: Self,
         vocab_size: int = 50257,  # vocab size of the BPE tokenizer
@@ -17,13 +17,13 @@ class SimpleEmbeddingV1(torch.nn.Module):
         self.token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
         # We use the absolute position approach (as opposed to relative position).
         self.pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
-    
+
     def forward(self: Self, x: torch.Tensor) -> torch.Tensor:
         # x expected to be shape batch_size x context_length
         if len(x.shape) != 2:
             raise ValueError(
                 "Expected input tensor of shape batch_size x context_length, ",
-                f"instead got: {x.shape=}"
+                f"instead got: {x.shape=}",
             )
         if x.shape[1] != self.context_length:
             # In practice, the input text can be longer than the supported context length,
@@ -34,7 +34,9 @@ class SimpleEmbeddingV1(torch.nn.Module):
             )
         token_embeddings = self.token_embedding_layer.forward(x)
         print(f"{token_embeddings.shape=}")
-        pos_embeddings = self.pos_embedding_layer.forward(torch.arange(self.context_length))
+        pos_embeddings = self.pos_embedding_layer.forward(
+            torch.arange(self.context_length)
+        )
         print(f"{pos_embeddings.shape=}")
         input_embeddings = token_embeddings + pos_embeddings
         print(f"{input_embeddings.shape=}")

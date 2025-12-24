@@ -1,4 +1,4 @@
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 
 from src import the_verdict
 from src.dataloader import create_dataloader_v1
@@ -29,7 +29,7 @@ def main():
         shuffle=False,
     )
     data_iter = iter(dataloader)
-    inputs, targets = next(data_iter) # get the first batch
+    inputs, targets = next(data_iter)  # get the first batch
     print("Inputs:\n", inputs)
     print("Targets:\n", targets)
 
