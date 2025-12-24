@@ -1,11 +1,10 @@
 from argparse import ArgumentParser
 from enum import StrEnum
-import os
 import re
 
-import requests
 import tiktoken
 
+from src import the_verdict
 from src.tokenizer import SimpleTokenizer, SimpleTokenizerV1, SimpleTokenizerV2
 
 
@@ -23,7 +22,7 @@ def main():
     parser.add_argument("tokenizer", choices=["v1", "v2", "bpe"])
     args = parser.parse_args()
 
-    raw_text = get_raw_text()
+    raw_text = the_verdict.get()
     vocabulary = extract_vocabulary(raw_text)
 
     match args.tokenizer:
@@ -56,23 +55,6 @@ def main():
         except Exception as e:
             print(f"Could not tokenize input: {str(e)}")
             break
-
-
-def get_raw_text() -> str:
-    target_file = "the-verdict.txt"
-    if os.path.isfile(target_file):
-        with open("the-verdict.txt", mode="r", encoding="utf-8") as f:
-            raw_text = f.read()
-    else:
-        with requests.get(
-            f"https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch02/01_main-chapter-code/{target_file}",
-        ) as resp:
-            if not resp.ok:
-                raise RuntimeError(f"Could not retrieve target file: status code {resp.status_code}")
-            raw_text = resp.text
-        with open(target_file, mode="w", encoding="utf-8") as f:
-            f.write(raw_text)
-    return raw_text
 
 
 def extract_vocabulary(raw_text: str) -> dict[str, int]:
