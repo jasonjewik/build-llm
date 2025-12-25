@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 
 from src import the_verdict
 from src.attention import (
+    CausalAttention,
     SelfAttentionV1,
     SelfAttentionV2,
     SimpleSelfAttention,
@@ -14,14 +15,20 @@ def main():
     parser = ArgumentParser(
         description="Showcases different attention mechanisms.",
     )
-    parser.add_argument("version", choices=["simple", "v1", "v2"])
+    parser.add_argument(
+        "version",
+        choices=["simple", "v1", "v2", "causal"],
+    )
     args = parser.parse_args()
 
     raw_text = the_verdict.get()
     max_length = 6  # the maximum length of any sample
+    # Only the causal attention mechanism is implemented to accept a batch of
+    # inputs (as opposed to a single sample).
+    batch_size = 2 if args.version == "causal" else 1
     dataloader = create_dataloader_v1(
         raw_text,
-        batch_size=1,  # one batch for simplicity
+        batch_size=batch_size,
         max_length=max_length,
         stride=max_length,  # stride = max_length means no overlapping windows
         shuffle=False,
@@ -52,14 +59,24 @@ def main():
                 d_out=2,
                 qkv_bias=False,
             )
+        case "causal":
+            self_attention = CausalAttention(
+                d_in=embedding_dim,
+                d_out=2,
+                context_length=max_length,
+                dropout=0.2,
+                qkv_bias=False,
+            )
         case _:
             raise ValueError(
                 f"Invalid attention version specified: {args.version}",
             )
 
-    # All the attention mechanisms are coded to take a single sample (i.e.,
-    # non-batched input).
-    context_vectors = self_attention.forward(input_embedding[0])
+    if batch_size == 1:
+        inputs = input_embedding[0]
+    else:
+        inputs = input_embedding
+    context_vectors = self_attention.forward(inputs)
     print("Context vectors:\n", context_vectors)
 
 
