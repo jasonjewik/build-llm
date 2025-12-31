@@ -1,9 +1,10 @@
 from typing import Self
 
 import torch
+import torch.nn as nn
 
 
-class CausalAttention(torch.nn.Module):
+class CausalAttention(nn.Module):
     """
     Scaled-dot product attention where only previous tokens are considered for
     calculations on the current token. We also add a dropout layer.
@@ -19,10 +20,10 @@ class CausalAttention(torch.nn.Module):
     ) -> None:
         super().__init__()
         self.d_out = d_out
-        self.W_query = torch.nn.Linear(d_in, d_out, bias=qkv_bias)
-        self.W_key = torch.nn.Linear(d_in, d_out, bias=qkv_bias)
-        self.W_value = torch.nn.Linear(d_in, d_out, bias=qkv_bias)
-        self.dropout = torch.nn.Dropout(p=dropout)
+        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
+        self.dropout = nn.Dropout(p=dropout)
         # Buffers are automatically moved to the appropriate device along with
         # the model.
         self.register_buffer(
@@ -31,7 +32,7 @@ class CausalAttention(torch.nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        b, num_tokens, d_in = x.shape
+        _, num_tokens, _ = x.shape
         keys = self.W_key.forward(x)
         queries = self.W_query.forward(x)
         values = self.W_value.forward(x)

@@ -15,7 +15,7 @@ def main():
     )
     data_iter = iter(dataloader)
     inputs, _ = next(data_iter)
-    embedding_model = SimpleEmbeddingV1(context_length=max_length)
+    embedding_model = SimpleEmbeddingV1(context_length=max_length, verbose=True)
     input_embedding = embedding_model.forward(inputs)
     print("Input embedding:\n", input_embedding)
 

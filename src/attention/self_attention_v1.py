@@ -1,26 +1,28 @@
 from typing import Self
 
 import torch
+import torch.nn as nn
 
 
-class SelfAttentionV1(torch.nn.Module):
+class SelfAttentionV1(nn.Module):
     """AKA scaled dot-product attention."""
 
-    def __init__(self: Self, d_in: int, d_out: int) -> None:
+    def __init__(self: Self, d_in: int, d_out: int, verbose: bool = False) -> None:
         # d_in = the token embedding dimension
         # d_out = the "attention" embedding dimension
         # In practice, usually d_in = d_out, but we can make them distinct here
         # for clarity.
         super().__init__()
+        self.verbose = verbose
         # From each token, we will compute a query, key, and value. These terms
         # were derived from information retrieval, so you can think of them
         # like this: When we multiply a token embedding by the query weight
         # matrix, we get a "query vector" which we check for similarity against
         # the "key vectors", to determine which tokens are most relevant to
         # the query. From there, we can grab the corresponding "value vectors".
-        self.W_query = torch.nn.Parameter(torch.rand(d_in, d_out))
-        self.W_key = torch.nn.Parameter(torch.rand(d_in, d_out))
-        self.W_value = torch.nn.Parameter(torch.rand(d_in, d_out))
+        self.W_query = nn.Parameter(torch.rand(d_in, d_out))
+        self.W_key = nn.Parameter(torch.rand(d_in, d_out))
+        self.W_value = nn.Parameter(torch.rand(d_in, d_out))
 
     def forward(self: Self, x: torch.Tensor) -> torch.Tensor:
         if len(x.shape) != 2:
@@ -31,9 +33,10 @@ class SelfAttentionV1(torch.nn.Module):
         keys = x @ self.W_key
         queries = x @ self.W_query
         values = x @ self.W_value
-        print(f"{keys.shape=}")
-        print(f"{queries.shape=}")
-        print(f"{values.shape=}")
+        if self.verbose:
+            print(f"{keys.shape=}")
+            print(f"{queries.shape=}")
+            print(f"{values.shape=}")
         # Compare this against the simple self attention, where we computed the
         # attention scores directly on the input token embeddings. By using
         # keys, queries, and values computed from learnable parameters, the
@@ -55,6 +58,7 @@ class SelfAttentionV1(torch.nn.Module):
         # print(torch.softmax(t, dim=-1))
         # print(torch.softmax(t/10, dim=-1))
         attn_weights = torch.softmax(attn_scores / keys.shape[1] ** 0.5, dim=1)
-        print("Attention weights:\n", attn_weights)
+        if self.verbose:
+            print("Attention weights:\n", attn_weights)
         context_vector = attn_weights @ values
         return context_vector

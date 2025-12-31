@@ -74,18 +74,22 @@ def main():
 
     match args.version:
         case Attention.SIMPLE:
-            self_attention = SimpleSelfAttention(context_length=max_length)
+            self_attention = SimpleSelfAttention(
+                context_length=max_length, verbose=True
+            )
         case Attention.V1:
             self_attention = SelfAttentionV1(
                 d_in=embedding_dim,
                 # Pick d_out != d_in for ease of visualization.
                 d_out=2,
+                verbose=True,
             )
         case Attention.V2:
             self_attention = SelfAttentionV2(
                 d_in=embedding_dim,
                 d_out=2,
                 qkv_bias=False,
+                verbose=True,
             )
         case Attention.CAUSAL:
             self_attention = CausalAttention(
@@ -103,6 +107,7 @@ def main():
                 dropout=0.2,
                 num_heads=2,  # ... with 2 heads means effective d_out=2
                 qkv_bias=False,
+                verbose=True,
             )
         case Attention.MULTI_HEAD_V2:
             self_attention = MultiHeadAttentionV2(
@@ -112,6 +117,7 @@ def main():
                 dropout=0.2,
                 num_heads=2,
                 qkv_bias=False,
+                verbose=True,
             )
         case _:
             raise ValueError(

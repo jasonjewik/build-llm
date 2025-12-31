@@ -1,9 +1,10 @@
 from typing import Self
 
 import torch
+import torch.nn as nn
 
 
-class SimpleEmbeddingV1(torch.nn.Module):
+class SimpleEmbeddingV1(nn.Module):
     """A simple embedding model with absolute positional embeddings."""
 
     def __init__(
@@ -11,12 +12,14 @@ class SimpleEmbeddingV1(torch.nn.Module):
         vocab_size: int = 50257,  # vocab size of the BPE tokenizer
         context_length: int = 4,  # number of tokens in each sample
         output_dim: int = 256,  # embedding vector dimension corresponding to each token
+        verbose: bool = False,
     ) -> None:
         super().__init__()
+        self.verbose = verbose
         self.context_length = context_length
-        self.token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
+        self.token_embedding_layer = nn.Embedding(vocab_size, output_dim)
         # We use the absolute position approach (as opposed to relative position).
-        self.pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
+        self.pos_embedding_layer = nn.Embedding(context_length, output_dim)
 
     def forward(self: Self, x: torch.Tensor) -> torch.Tensor:
         # x expected to be shape batch_size x context_length
@@ -33,11 +36,14 @@ class SimpleEmbeddingV1(torch.nn.Module):
                 f"Mismatch in context length: expected {self.context_length}, got {x.shape[1]}",
             )
         token_embeddings = self.token_embedding_layer.forward(x)
-        print(f"{token_embeddings.shape=}")
+        if self.verbose:
+            print(f"{token_embeddings.shape=}")
         pos_embeddings = self.pos_embedding_layer.forward(
             torch.arange(self.context_length)
         )
-        print(f"{pos_embeddings.shape=}")
+        if self.verbose:
+            print(f"{pos_embeddings.shape=}")
         input_embeddings = token_embeddings + pos_embeddings
-        print(f"{input_embeddings.shape=}")
+        if self.verbose:
+            print(f"{input_embeddings.shape=}")
         return input_embeddings
